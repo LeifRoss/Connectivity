@@ -1,7 +1,6 @@
 package connectivity.utility;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,7 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.URISyntaxException;
 
 import javax.imageio.ImageIO;
 
@@ -177,22 +176,33 @@ public class Utility {
 		}
 
 
-		URL path = Utility.class.getProtectionDomain().getCodeSource().getLocation();
-		String location = path.getFile().substring(1,path.getFile().length());
-		String result = "";
+		String path = "";
 
-		String[] expl = location.split("/");
+		try {
 
-		for(String s : expl){
-			if(s.contains("bin")){
-				break;
+			File jarpath = new File(Utility.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+
+			path = jarpath.getPath();
+			path = path.replace("\\", "/");
+
+			if(path.endsWith("bin/")){
+				path = path.replaceAll("bin/", "");
+			}else if(path.endsWith("bin//")){
+				path = path.replaceAll("bin//", "");
+			}else if(path.endsWith("bin")){
+				path = path.replaceAll("bin", "");
 			}
-			result+=s+"//";		
 
+			if(path.endsWith(".jar")){			
+				path = path.substring(0, path.lastIndexOf("/")+1);		
+			}
+
+			assetsLocation = path + "assets//";		
+
+		}  catch (URISyntaxException e) {
+			e.printStackTrace();
 		}
-		result+="assets//";
 
-		assetsLocation = result.replaceAll("%20", " ");
 
 
 		return assetsLocation;
